@@ -61,6 +61,8 @@ let cTab;
         "#stats .style-scope.ytd-playlist-sidebar-primary-info-renderer"
       );
 
+      let ChannelName = await cTab.evaluate(getChannelName,'#owner-text.style-scope.ytd-playlist-header-renderer')
+
       let totalVideos = noOfVideoViews.noOfVideos.split(" ")[0];
 
       // Determine the total videos that can fetched one time without scrolling. After some scrolling we have to wait for some times to load more video
@@ -75,8 +77,9 @@ let cTab;
 
       // Gives final List Of videos.
       let Stats = await getStats();
+
       let AvgTimeAndTotalTime = calculatePlaylistStats(Stats);
-      createPDF(name, noOfVideoViews, Stats, AvgTimeAndTotalTime);
+      createPDF(name, ChannelName, noOfVideoViews, Stats, AvgTimeAndTotalTime);
     } else {
       console.log("Not Youtube Playlist URL");
       exit();
@@ -104,6 +107,12 @@ function getData(selector) {
   };
 }
 
+//Get Channel name
+async function getChannelName(ChannelNameSelector){
+  let ChannelNameElement = document.querySelector(ChannelNameSelector);
+  return ChannelNameElement.innerText;
+}
+
 // For get the videos in current page.
 async function getCurrentVideosLength() {
   let length = cTab.evaluate(
@@ -129,16 +138,17 @@ async function getStats() {
   let videoList = cTab.evaluate(
     getNameAndDuration,
     "#video-title",
-    "#container>#thumbnail span.style-scope.ytd-thumbnail-overlay-time-status-renderer"
+    "#container>#thumbnail span.style-scope.ytd-thumbnail-overlay-time-status-renderer",
+    "#metadata>#video-info span.style-scope.yt-formatted-string"
   );
   return videoList;
 }
 
 // For video title and video duration
-function getNameAndDuration(VideoSelector, DurationSelector) {
+function getNameAndDuration(VideoSelector, DurationSelector, ViewSelector) {
   let videoElementTitles = document.querySelectorAll(VideoSelector);
   let videoElementsDuration = document.querySelectorAll(DurationSelector);
-
+  let videoElementViews = document.querySelectorAll(ViewSelector);
   let VideoList = [];
   for (let i = 0; i < videoElementsDuration.length; i++) {
     let videoTitle = videoElementTitles[i].innerText;
@@ -184,7 +194,7 @@ function calculatePlaylistStats(Stats) {
   };
 }
 
-function createPDF(name, noOfVideoViews, Stats, AvgTimeAndTotalTime) {
+function createPDF(name, ChannelName, noOfVideoViews, Stats, AvgTimeAndTotalTime) {
   let doc = new pdf();
   let filePath;
 
@@ -206,7 +216,8 @@ function createPDF(name, noOfVideoViews, Stats, AvgTimeAndTotalTime) {
   doc.fontSize(22).text(name, { align: "center" });
 
   doc.moveDown();
-  doc.fontSize(16).text(`Number of Videos: ${noOfVideoViews.noOfVideos}`);
+  doc.fontSize(16).text(`Channel Name: ${ChannelName}`)
+  doc.text(`Number of Videos: ${noOfVideoViews.noOfVideos}`);
   doc.text(`Number of Views: ${noOfVideoViews.noOfViews}`);
   doc.text(
     `Total Time: ${AvgTimeAndTotalTime.totalHours} hr ${AvgTimeAndTotalTime.totalMinutes} min ${AvgTimeAndTotalTime.totalSeconds} sec`
