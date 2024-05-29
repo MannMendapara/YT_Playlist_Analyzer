@@ -25,5 +25,23 @@ You can use this application via the command line interface (CLI) by providing a
    - Clone the repository to your local machine:
    
    ```bash
-   git clone <repository_url>
-   cd <repository_directory>
+   git clone https://github.com/MannMendapara/YT_Playlist_Analyzer
+   cd YT_Playlist_Analyzer
+
+2. **Install the required packages.**
+   - Run the following command to install all necessary dependencies:
+
+   ```bash
+   npm install
+
+3. **Make the command globally accessible.**
+   - Link the CLI script globally to make the command available system-wide:
+  
+   ```bash
+   npm link
+
+4. **Execute the command.**
+   - Open CMD or any CLI from any path and execute the command with your desired YouTube playlist link and destination path:
+  
+   ```bash
+   YouTube 'Playlist Link' 'Destination Path'
